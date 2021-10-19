@@ -158,7 +158,7 @@ strings output:
 
 ## Submission
 
-Due: 23:59pm, November 11th, 2021. 10% of penalty for late submission within 48 hours; 20% of penalty after the 48 hours window. Not accepted after 48 hours.
+Due: 23:59pm, November 11th, 2021. 10% of penalty for late submission within 48 hours; 20% of penalty after the 48 hours window.
 
 ## Grading Rubric (Undergraduate and Graduate)
 
