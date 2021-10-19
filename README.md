@@ -83,9 +83,9 @@ In some versions, you may not have this file setup. Alternatively,  you can use 
 
 We have provided a test program called test-booga.c. We will use this program to test the driver. While testing your program, the following situations may arise:
 
-The system hangs and you have to hit the reset button
-The system spontaneously reboots. Oops!
-The kernel prints an oops message (a milder version of the infamous General Protection Fault). You will get a stack trace with it that should help in narrowing down the cause
+- The system hangs and you have to hit the reset button
+- The system spontaneously reboots. Oops!
+- The kernel prints an oops message (a milder version of the infamous General Protection Fault). You will get a stack trace with it that should help in narrowing down the cause
 
 Once you run make, your compiler will compile test-booga.c into a binary called test-booga. Two scripts are provided for testing - they will call test-booga. Run booga-test1.sh to test regular functionalities of your driver, and run booga-test2.sh to test if your driver is thread-safe or not.
 
