@@ -4,7 +4,7 @@ In this assignment, we will write a simple character driver called booga. Note t
 
 ## Important notes
 
-You MUST build against the kernel version installed on the cs453 VM. If you are unclear what kernel version to build against please ask do NOT just assume. You will need to use root in this project is to load and unload the drivers.
+You MUST build against the kernel version (3.10.0-957.el7.x86_64) installed on the cs453 VM. You will need to use root in this project is to load and unload the drivers.
 
 # Specification
 
