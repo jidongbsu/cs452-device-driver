@@ -158,11 +158,9 @@ strings output:
 
 ## Submission
 
-Create a private repository on github and give access permission to this account: jidongbsu (or using the email address: jidongxiao@boisestate.edu). You can use one repository for all 3 projects in this course, so that you only need to grant access permission to Jidong once.
+Due: 23:59pm, November 11th, 2021. 10% of penalty for late submission within 48 hours; 20% of penalty after the 48 hours window. Not accepted after 48 hours.
 
-Due Date:  November 19th, 2020.
-
-## Grading Rubric
+## Grading Rubric (Undergraduate and Graduate)
 
 - [10 pts] Compiling
   - Each compiler warning will result in a 3 point deduction.
