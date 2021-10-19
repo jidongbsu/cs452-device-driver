@@ -8,7 +8,8 @@ You MUST build against the kernel version (3.10.0-957.el7.x86_64) installed on t
 
 # Specification
 
-The main driver
+## The main driver
+
 The booga driver is a simple character driver that supports the open, read and write and close operations. The driver supports four minor numbers: 0, 1, 2, and 3. The device files are: /dev/booga0, /dev/booga1, /dev/booga2, /dev/booga3. We will also create a link from /dev/booga to /dev/booga0, so that acts as the default device when someone accesses /dev/booga. On reading from /dev/booga0, /dev/booga1, /dev/booga2 and /dev/booga3 the driver gives a stream of one of the following phrases:
 
 - booga! booga!
