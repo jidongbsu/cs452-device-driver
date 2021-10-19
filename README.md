@@ -1,6 +1,6 @@
 # Overview
 
-In this assignment, we will write a simple character driver called booga. Note that, you will only be able to test this assignment on a Linux machine where you have root privilege. A VMware-based CentOS 7 (64 bit) VM image is provided. Later on we will refer to this VM as the cs453 VM. (username/password: cs453/cs453, run commands with sudo to gain root privilege). You can also download a CentOS 7 (64 bit) and install it by yourself, and you can also use VirtualBox.
+In this assignment, we will write a simple character driver called booga. Note that, you will only be able to test this assignment on a Linux machine where you have root privilege. A VMware-based CentOS 7 (64 bit) VM image is provided. Later on we will refer to this VM as the cs453 VM - this course used to be called cs453, now it's called cs452, the VM was created back then. (username/password: cs453/cs453, run commands with sudo to gain root privilege). You can also download a CentOS 7 (64 bit) and install it by yourself, and you can also use VirtualBox.
 
 ## Important notes
 
