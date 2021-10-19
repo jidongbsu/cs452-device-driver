@@ -178,5 +178,5 @@ Due: 23:59pm, November 11th, 2021. 10% of penalty for late submission within 48 
   - Report on strings :                  5/5
 
 - [10 pts] Documentation:
-  - Plan for testing:
+  - README.md file (replace this current README.md with a new one using the template on the course page)
 
