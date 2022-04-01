@@ -14,8 +14,8 @@ test-booga: test-booga.o
 
 clean:
 	/bin/rm -f test-booga test-booga.o
-	/bin/rm -f .booga* booga.o booga.mod.c booga.mod.o booga.ko Modules.* modules.*
-	/bin/rm -fr .tmp_versions/
+	/bin/rm -f .booga* booga.o booga.mod.c booga.mod.o booga.ko Module.* modules.*
+	/bin/rm -rf .tmp_versions/
 
 
 
