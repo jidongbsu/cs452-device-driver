@@ -159,7 +159,11 @@ strings output:
 
 ## Submission
 
-Due: 23:59pm, November 11th, 2021. 10% of penalty for late submission within 48 hours; 20% of penalty after the 48 hours window.
+Due: 23:59pm, April 21st, 2022. Late submission will not be accepted/graded.
+
+## Project Layout
+
+All files necessary for compilation and testing need to be submitted, this includes source code files, header files, Makefile, and bash scripts. The structure of the submission folder should be the same as what was given to you.
 
 ## Grading Rubric (Undergraduate and Graduate)
 
