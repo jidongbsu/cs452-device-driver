@@ -1,10 +1,10 @@
 # Overview
 
-In this assignment, we will write a simple character driver called booga. Note that, you will only be able to test this assignment on a Linux machine where you have root privilege. A VMware-based CentOS 7 (64 bit) VM image is provided. Later on we will refer to this VM as the cs453 VM - this course used to be called cs453, now it's called cs452, the VM was created back then. (username/password: cs453/cs453, run commands with sudo to gain root privilege). You can also download a CentOS 7 (64 bit) and install it by yourself, and you can also use VirtualBox.
+In this assignment, we will write a simple character driver called booga. You should still use the cs452 VM which you used for your tesla, lexus, and infiniti, as loading and unloading the kernel module requires the root privilege.
 
 ## Important notes
 
-You MUST build against the kernel version (3.10.0-957.el7.x86_64) installed on the cs453 VM. You will need to use root in this project is to load and unload the drivers.
+You MUST build against the kernel version (3.10.0-1160.el7.x86_64), which is the default version of the kernel installed on the cs452 VM.
 
 # Specification
 
