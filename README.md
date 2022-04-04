@@ -22,15 +22,15 @@ This chapter explains what roles I/O devices play in a computer system, and how 
 
 ## The main driver
 
-The booga driver is a simple character driver that supports the open, read and write and close operations. The driver supports four minor numbers: 0, 1, 2, and 3. The device files are: /dev/booga0, /dev/booga1, /dev/booga2, /dev/booga3. We will also create a link from /dev/booga to /dev/booga0, so that acts as the default device when someone accesses /dev/booga. 
+The toyota driver is a simple character driver that supports the open, read and write and close operations. The driver supports four minor numbers: 0, 1, 2, and 3. The device files are: /dev/toyota0, /dev/toyota1, /dev/toyota2, /dev/toyota3. We will also create a link from /dev/toyota to /dev/toyota0, so that acts as the default device when someone accesses /dev/toyota. 
 
-On writing to booga devices:
+On writing to toyota devices:
 
-- if a process tries to write /dev/booga1, /dev/booga2, the booga device driver works like  /dev/null (so it pretends to write the buffer but doesn't actually write to any device). 
-- if a process tries to write to /dev/booga3, it suffers from sudden death! You cannot call the system call kill() from inside the kernel space so you will have to figure out how to terminate a process from inside the kernel. Search the function kill_pid() in the kernel sources for ideas. Use the SIGTERM signal instead of SIGKILL for terminating the process.
-- if a process tries to write to /dev/booga0, the booga device driver must store the written data into an internal buffer - we assume applications only write a string to this device and we assume this string only contains lower case English letters.
+- if a process tries to write /dev/toyota1, /dev/toyota2, the toyota device driver works like  /dev/null (so it pretends to write the buffer but doesn't actually write to any device). 
+- if a process tries to write to /dev/toyota3, it suffers from sudden death! You cannot call the system call kill() from inside the kernel space so you will have to figure out how to terminate a process from inside the kernel. Search the function kill_pid() in the kernel sources for ideas. Use the SIGTERM signal instead of SIGKILL for terminating the process.
+- if a process tries to write to /dev/toyota0, the toyota device driver must store the written data into an internal buffer - we assume applications only write a string to this device and we assume this string only contains lower case English letters.
 
-On reading from /dev/booga0, /dev/booga1, /dev/booga2 and /dev/booga3 the driver will process the data (which is a string which is stored in the aforementioned internal buffer) in such a way: it removes duplicate letters from the string, so that every letter appears once and only once. You must make sure your result is the smallest in lexicographical order among all possible results. In this next paragraph, we will refer to this result as the **result string**.
+On reading from /dev/toyota0, /dev/toyota1, /dev/toyota2 and /dev/toyota3 the driver will process the data (which is a string which is stored in the aforementioned internal buffer) in such a way: it removes duplicate letters from the string, so that every letter appears once and only once. You must make sure your result is the smallest in lexicographical order among all possible results. In this next paragraph, we will refer to this result as the **result string**.
 
 Note that the driver does not just return the above **result string** to the user application. Rather, it returns a stream of the **result string**. 
 
@@ -45,15 +45,15 @@ In case if the number of bytes requested by the user is not a multiple of the le
 
 ## Notes
 
-Here are the prototypes of the functions that your driver would need to implement - in booga.c and booga.h.
+Here are the prototypes of the functions that your driver would need to implement - in toyota.c and toyota.h.
 
 ```c
-static int booga_open (struct inode *inode, struct file *filp);
-static int booga_release (struct inode *inode, struct file *filp);
-static ssize_t booga_read (struct file *filp, char *buf, size_t count, loff_t *f_pos);
-static ssize_t booga_write (struct file *filp, const char *buf, size_t count, loff_t *f_pos);
-static int __init booga_init(void);
-static void __exit booga_exit(void);
+static int toyota_open (struct inode *inode, struct file *filp);
+static int toyota_release (struct inode *inode, struct file *filp);
+static ssize_t toyota_read (struct file *filp, char *buf, size_t count, loff_t *f_pos);
+static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, loff_t *f_pos);
+static int __init toyota_init(void);
+static void __exit toyota_exit(void);
 ```
 
 Remember that you need to use the **__copy_to_user(...)** kernel function to copy the data to user space. 
@@ -66,41 +66,41 @@ sudo tail -f /var/log/messages
 
 In some versions, you may not have this file setup. Alternatively,  you can use the command **sudo dmesg --follow** to watch for kernel log messages.
 
-We have provided a test program called test-booga.c. We will use this program to test the driver. While testing your program, the following situations may arise:
+We have provided a test program called test-toyota.c. We will use this program to test the driver. While testing your program, the following situations may arise:
 
 - The system hangs and you have to hit the reset button
 - The system spontaneously reboots. Oops!
 - The kernel prints an oops message (a milder version of the infamous General Protection Fault). You will get a stack trace with it that should help in narrowing down the cause
 
-Once you run make, your compiler will compile test-booga.c into a binary called test-booga. Two scripts are provided for testing - they will call test-booga. Run booga-test1.sh to test regular functionalities of your driver, and run booga-test2.sh to test if your driver is thread-safe or not.
+Once you run make, your compiler will compile test-toyota.c into a binary called test-toyota. Two scripts are provided for testing - they will call test-toyota. Run toyota-test1.sh to test regular functionalities of your driver, and run toyota-test2.sh to test if your driver is thread-safe or not.
 
-Here is a sample session with the booga driver. Note that the characters returned by the driver do not contain any newline characters. The output shown below was reformatted slightly for this document.
+Here is a sample session with the toyota driver. Note that the characters returned by the driver do not contain any newline characters. The output shown below was reformatted slightly for this document.
 
 ```console
 [user@localhost]$ make
 make -C /lib/modules/`uname -r`/build M=`pwd` modules
 make[1]: Entering directory '/usr/src/kernels/4.14.11-200.fc26.x86_64'
- CC [M]  /home/user/Documents/classes/cs453/github/CS453/projects/p5/grader/solutions/user/booga.o
+ CC [M]  /home/user/Documents/classes/cs453/github/CS453/projects/p5/grader/solutions/user/toyota.o
  Building modules, stage 2.
  MODPOST 1 modules
- CC      /home/user/Documents/classes/cs453/github/CS453/projects/p5/grader/solutions/user/booga.mod.o
- LD [M]  /home/user/Documents/classes/cs453/github/CS453/projects/p5/grader/solutions/user/booga.ko
+ CC      /home/user/Documents/classes/cs453/github/CS453/projects/p5/grader/solutions/user/toyota.mod.o
+ LD [M]  /home/user/Documents/classes/cs453/github/CS453/projects/p5/grader/solutions/user/toyota.ko
 make[1]: Leaving directory '/usr/src/kernels/4.14.11-200.fc26.x86_64'
-cc    -c -o test-booga.o test-booga.c
-cc  -o test-booga test-booga.o
+cc    -c -o test-toyota.o test-toyota.c
+cc  -o test-toyota test-toyota.o
 
 [user@localhost]$ ls
-booga.c   booga_load   booga.o         booga_unload   Module.symvers  test-booga.c
-booga.h   booga.mod.c  booga-test1.sh  Makefile       README.md       test-booga.o
-booga.ko  booga.mod.o  booga-test2.sh  modules.order  test-booga
+toyota.c   toyota_load   toyota.o         toyota_unload   Module.symvers  test-toyota.c
+toyota.h   toyota.mod.c  toyota-test1.sh  Makefile       README.md       test-toyota.o
+toyota.ko  toyota.mod.o  toyota-test2.sh  modules.order  test-toyota
 [user@localhost ]$
 
-[user@localhost]$ sudo ./booga_load       
+[user@localhost]$ sudo ./toyota_load       
 [sudo] password for user:  
 
 [user@localhost]$ /sbin/lsmod  
 Module                  Size  Used by
-booga                  16384  0
+toyota                  16384  0
 bluetooth             593920  0
 ecdh_generic           24576  1 bluetooth
 rfkill                 28672  2 bluetooth
@@ -108,23 +108,23 @@ ipt_MASQUERADE         16384  1
 nf_nat_masquerade_ipv4    16384  1 ipt_MASQUERADE
 . . .
 
-[user@localhost]$ ./test-booga 0 100 read
+[user@localhost]$ ./test-toyota 0 100 read
 Read returned 100 characters
 wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! Wo
 
-[user@localhost]$ ./test-booga 0 100 read
+[user@localhost]$ ./test-toyota 0 100 read
 Read returned 100 characters
 googoo! gaga! googoo! gaga! googoo! gaga! googoo! gaga! googoo! gaga! googoo! gaga! googoo! gaga! go
 
-[user@localhost]$ ./test-booga 0 100 write
-Attempting to write to booga device
+[user@localhost]$ ./test-toyota 0 100 write
+Attempting to write to toyota device
 Wrote 100 bytes.
 
-[user@localhost]$ ./test-booga 3 100 write  
-Attempting to write to booga device
+[user@localhost]$ ./test-toyota 3 100 write  
+Attempting to write to toyota device
 Terminated
 
-[user@localhost]$ sudo ./booga_unload 
+[user@localhost]$ sudo ./toyota_unload 
 ```
 
 ## Submission
@@ -141,7 +141,7 @@ All files necessary for compilation and testing need to be submitted, this inclu
   - Each compiler warning will result in a 3 point deduction.
   - You are not allowed to suppress warnings
 
-- [70 pts] Main driver: supports read properly, writing (to device 1 and 2) acts like /dev/null, kill process writing to booga3
+- [70 pts] Main driver: supports read properly, writing (to device 1 and 2) acts like /dev/null, kill process writing to toyota3
   - test1 produces expected results /10
   - test2 produces expected results /20
   - test3 produces expected results /20
