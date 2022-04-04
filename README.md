@@ -123,7 +123,7 @@ static int __init toyota_init(void){
 }
 ```
 
-The above code registers this driver into the kernel. The kernel will assign an available major number to this device/driver. If registration succeeds, *register_chrdev*() returns the assigned major number. Otherwise, *reigster_chrdev*() returns a negative value.
+The above code registers this driver into the kernel. The kernel will assign an available major number (a number between 0 and 255) to this device/driver. If registration succeeds, *register_chrdev*() returns the assigned major number. Otherwise, *register_chrdev*() returns a negative value.
 
 The first argument of *register_chrdev*(), which is *toyota_major*, is a global variable initialized to 0, but we then use it to store the assigned major number, and later on we will pass this major number to *unregister_chrdev*().
 
@@ -133,7 +133,7 @@ The third argument of *register_chrdev*(), which is *&toyota_fops*, tells the ke
 
 ```c
 static struct file_operations toyota_fops = {
-	.owner = THIS_MODULE,
+    .owner = THIS_MODULE,
     .llseek =     NULL,
     .read =       toyota_read,
     .write =      toyota_write,
