@@ -95,23 +95,13 @@ In the remainder of this README file, the above six functions will be referred t
 
 ## Predefined Data Structures and Global Variables
 
-The starter code does not define any data structures. It does define two global variables (macros).
+The starter code does not define any data structures. It defines one global variable called *struct file_operations toyota_fops*, which will be described in the next section.
 
-```c
-#define TOYOTA_MAJOR 0   /* dynamic major by default */
+You are recommended to define 3 global variables.
 
-static int toyota_major = TOYOTA_MAJOR;
-```
-
-As you can see, *toyota_major* is initialized to 0. The use of *toyota_major* will be described in the next section. 
-
-```c
-#define TOYOTA_NR_DEVS 4    /* toyota0 through toyota3 */
-```
-
-This line says *TOYOTA_NR_DEVS* is 4, which is the number of devices this driver supports. The use of TOYOTA_NR_DEVS will be described in the next section.
-
-In addition, you may want to define your own global variables, for example, you may want to have a global variable to track which device is being access, and you may want to have a global buffer so that both *read*() and *write*() can access.
+- you may want to have a global integer variable to track which device is being access, 
+- you may want to have a global buffer (or a global pointer) so that both *read*() and *write*() can access.
+- you may want to have a global integer variable to track the major device number.
 
 ## Related Kernel APIs
 
@@ -130,24 +120,19 @@ All drivers are eventually managed by the kernel, and we call register_chrdev() 
 
 ```c
 static int __init toyota_init(void){
-    int result;
+
 
     /*
      * register your major, and accept a dynamic number.
      */
-    result = register_chrdev(toyota_major, "toyota", &toyota_fops);
-    if (result < 0) {
-        printk(KERN_WARNING "toyota: can't get major %d\n",toyota_major);
-        return result;
-    }
-    if (toyota_major == 0) toyota_major = result;
+    register_chrdev(0, "toyota", &toyota_fops);
     ...
 }
 ```
 
 The above code registers this driver into the kernel. The kernel will assign an available major number (a number between 0 and 255) to this device/driver. If registration succeeds, *register_chrdev*() returns the assigned major number. Otherwise, *register_chrdev*() returns a negative value.
 
-The first argument of *register_chrdev*(), which is *toyota_major*, is a global variable initialized to 0, but we then use it to store the assigned major number, and later on we will pass this major number to *unregister_chrdev*().
+The first argument of *register_chrdev*(): if this argument is non-zero, it means we want to specify one specific major number; if this argument is zero, it means we do not care what the number is, just assign us any number that is still available. Here we use *0*, which means we want to kernel to dynamically allocate one number to us. Remember, the assigned number will be the return value of *register_chrdev*(), and this same number needs to be passed to *unregister_chrdev*() as its first argument. This is why you are recommended to use a global variable to store this return value so that later on it can easily be passed to *unregister_chrdev*().
 
 The second argument of *register_chrdev*(), which is *toyota*, tells the kernel this driver is named as *toyota*.
 
@@ -171,7 +156,7 @@ You can then unregister the driver like this in your *exit*() function.
 ```c
 static void __exit toyota_exit(void){
 	/* reverse the effect of register_chrdev(). */
-    unregister_chrdev(toyota_major, "toyota");
+    unregister_chrdev(**whatever returned by register_chrdev()**, "toyota");
     ...
 }    
 ```
@@ -230,7 +215,7 @@ static int toyota_open (struct inode *inode, struct file *filp)
 }
 ```
 
-You may also want to check to make sure this *num* is smaller than TOYOTA_NR_DEVS, which is 4; if not, your open() function can return *-ENODEV*, meaning no such a device.
+You may also want to check to make sure this *num* is smaller than 4 - because we only support minor number 0-3; if this *num* is equal to or greater than 4, your open() function should return *-ENODEV*, meaning no such a device.
 
 ## Debugging
 
