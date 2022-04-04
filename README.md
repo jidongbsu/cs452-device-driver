@@ -104,13 +104,97 @@ Read the README file of assignment one to see how to use them.
 
 - register_chrdev();
 - unregister_chrdev();
+All drivers are eventually managed by the kernel, and we call register_chrdev() to register a char device driver with the kernel, and call *unregister_chrdev*() to unregister a char device driver from the kernel. To register, you can call *register_chrdev*() in your *init*() function like this:
+
+```c
+static int __init toyota_init(void){
+    int result;
+
+    /*
+     * register your major, and accept a dynamic number.
+     */
+    result = register_chrdev(toyota_major, "toyota", &toyota_fops);
+    if (result < 0) {
+        printk(KERN_WARNING "toyota: can't get major %d\n",toyota_major);
+        return result;
+    }
+    if (toyota_major == 0) toyota_major = result;
+    ...
+}
+```
+
+The above code registers this driver into the kernel. The kernel will assign an available major number to this device/driver. If registration succeeds, *register_chrdev*() returns the assigned major number. Otherwise, *reigster_chrdev*() returns a negative value.
+
+The first argument of *register_chrdev*(), which is *toyota_major*, is a global variable initialized to 0, but we then use it to store the assigned major number, and later on we will pass this major number to *unregister_chrdev*().
+
+The second argument of *register_chrdev*(), which is *toyota*, tells the kernel this driver is named as *toyota*.
+
+The third argument of *register_chrdev*(), which is *&toyota_fops*, tells the kernel, *toyota_fops*, which is *struct file_operations* variable, will be responsible for file operations on /dev/toyota (including /dev/toyota0, /dev/toyota1, ...). *toyota_fops* is defined as this:
+
+```c
+static struct file_operations toyota_fops = {
+	.owner = THIS_MODULE,
+    .llseek =     NULL,
+    .read =       toyota_read,
+    .write =      toyota_write,
+    .open =       toyota_open,
+    .release =    toyota_release,
+};
+```
+
+This struct variable (together with the *register_chrdev*() function), tells the kernel: when users try to open /dev/toyota*, the kernel should call *toyota_open*(); when users try to close /dev/toyota*, the kernel should call *toyota_release*(); when users try to read from /dev/toyota*, the kernel should call *toyota_read*(); when users try to write to /dev/toyota*, the kernel should call *toyota_write*().
+
+You can then unregister the driver like this in your *exit*() function.
+```c
+static void __exit toyota_exit(void){
+	/* reverse the effect of register_chrdev(). */
+    unregister_chrdev(toyota_major, "toyota");
+    ...
+}    
+```
 
 - try_module_get();
 - module_put(); 
+Device drivers need to maintain a usage count, so that it can not be removed when it's in use. To this end, you can call *try_module_get*() in your *open*() function, and call *module_put*() in your *release*() function. You can call *try_module_get*() like this in your *open*() function,
+
+```c
+static int toyota_open (struct inode *inode, struct file *filp){
+    ...
+    try_module_get(THIS_MODULE);
+    return 0;          /* success */
+}
+```
+
+You can call *module_put*() like this in your release() function:
+```c
+static int toyota_release (struct inode *inode, struct file *filp){
+    ...
+	   module_put(THIS_MODULE);
+    return 0;
+}
+```
 
 - kill_pid();
+This function allows you to kill a process from the kernel level, you can call it like this:
+
+```c
+kill_pid(task_pid(current), SIGTERM, 1);
+```
+
+Remember *current* in Linux kernel has a special meaning, it represents the current running process, and therefore you do not need to define/declare it.
+
+## Provided Helper Functions
 
 - NUM();
+Your write() function will behave differently based on the minor number of the device being accessed. To know the minor number of the accessed device, you can call *NUM*() like this:
+
+```c
+static int toyota_open (struct inode *inode, struct file *filp)
+{
+    int num = NUM(inode->i_rdev);
+    toyota_device->number = num;
+}
+```
 
 ## Debugging
 
