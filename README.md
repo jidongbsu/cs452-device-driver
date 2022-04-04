@@ -53,6 +53,8 @@ Each device in Unix/Linux systems has a corresponding file under the */dev* dire
 
 To be added soon.
 
+You will be completing the toyota.c file. You should not modify the toyota.h file.
+
 To install the module, run *make* and then *sudo insmod toyota.ko*; to remove it, run sudo *rmmod toyota*. Yes, in *rmmod*, whether or not you specify ko does not matter; but in *insmod*, you must have that ko.
 
 ## The Main Driver
@@ -80,7 +82,7 @@ In case if the number of bytes requested by the user is not a multiple of the le
 
 ## Functions You Need to Implement
 
-Here are the prototypes of the functions that your driver would need to implement - in toyota.c and toyota.h.
+Here are the prototypes of the functions that your driver would need to implement in toyota.c.
 
 ```c
 static int toyota_open (struct inode *inode, struct file *filp);
