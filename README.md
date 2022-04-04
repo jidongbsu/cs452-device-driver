@@ -16,13 +16,27 @@ In this assignment, we assume applications only access our device sequentially, 
 
 ## Book References
 
-Operating Systems: Three Easy Pieces: [I/O Devices](https://pages.cs.wisc.edu/~remzi/OSTEP/file-devices.pdf)
+Operating Systems: Three Easy Pieces: [I/O Devices](https://pages.cs.wisc.edu/~remzi/OSTEP/file-devices.pdf).
 
 This chapter explains what roles I/O devices play in a computer system, and how device drivers in general, but in reality, every device is different, and its behavior is defined by the device vendor - the company who makes the device. Given that everyone's computer is different, it is not realistic for us to write a device driver for a specific device - your computer may not have this device. Thus in this assignment, we will just pretend that there is a device, and we allow applications to access this device via our device driver. And in this device driver, we will simulate the behavior of a device. In particular, we allow applications to open, read, write, close the device.
 
+## Background
+
+### Character Device vs Block Device
+
+To be added soon.
+
+### Major Device Number vs Minor Device Number
+
+To be added soon.
+
 # Specification
 
-## The main driver
+## The Starter Code
+
+To be added soon.
+
+## The Main Driver
 
 The toyota driver is a simple character driver that supports the open, read and write and close operations. The driver supports four minor numbers: 0, 1, 2, and 3. The device files are: /dev/toyota0, /dev/toyota1, /dev/toyota2, /dev/toyota3. We will also create a link from /dev/toyota to /dev/toyota0, so that acts as the default device when someone accesses /dev/toyota. 
 
@@ -45,7 +59,7 @@ In case if the number of bytes requested by the user is not a multiple of the le
 - if the **result string** is *abc*, and if the user wants to read 5 bytes, then the read() function of your driver should return *abcab*;
 - if the **result string** is *abc*, and if the user wants to read 10 bytes, then the read() function of your driver should return *abcabcabca*.
 
-## Notes
+## Functions You Need to Implement
 
 Here are the prototypes of the functions that your driver would need to implement - in toyota.c and toyota.h.
 
@@ -58,15 +72,42 @@ static int __init toyota_init(void);
 static void __exit toyota_exit(void);
 ```
 
-Remember that you need to use the **__copy_to_user(...)** kernel function to copy the data to user space. 
+## Related Kernel APIs
+
+I used the following APIs:
+
+- kmalloc();
+- kfree();
+- copy_from_user();
+- copy_to_user();
+
+Read the README file of assignment one to see how to use them.
+
+- register_chrdev();
+- unregister_chrdev();
+
+- try_module_get();
+- module_put(); 
+
+- kill_pid();
+
+- NUM();
+
+## Debugging
 
 Note that the kernel print messages will not show on the screen. The messages are, however, logged in the file /var/log/messages. You can open another terminal and watch the output to the system messages file with the command:
 
 ```console
-sudo tail -f /var/log/messages
+# sudo tail -f /var/log/messages
 ```
 
-In some versions, you may not have this file setup. Alternatively,  you can use the command **sudo dmesg --follow** to watch for kernel log messages.
+Alternatively,  you can use the command:
+
+```console
+# sudo dmesg --follow
+```
+
+## Testing
 
 We have provided a test program called test-toyota.c. We will use this program to test the driver. While testing your program, the following situations may arise:
 

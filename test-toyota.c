@@ -29,7 +29,7 @@ static void run_read_test(char *device, int bufsize)
 		perror("Read failed:");
 		exit(2);
 	} else {
-		fprintf(stderr, " booga returned %d characters\n", in);
+		fprintf(stderr, " toyota returned %d characters\n", in);
 	}
 
 	buf[bufsize]='\0';
@@ -53,8 +53,9 @@ static void run_write_test(char *device, int bufsize)
 		exit(1);
 	}
 	buf = (char *) malloc(sizeof(char)*(bufsize+1));
-	fprintf(stderr, "Attempting to write to booga device\n");
-	out = write(src, buf, bufsize);
+	fprintf(stderr, "Attempting to write to toyota device\n");
+	out = write(src, "cbacdcbc", bufsize);
+	//out = write(src, "bcabc", bufsize);
 	fprintf(stderr, "Wrote %d bytes.\n", out);
 	free(buf);
 	close(src);
@@ -79,7 +80,7 @@ int main(int argc, char **argv)
 	}
 
 	device = (char *)malloc(sizeof(char)*DEV_NAME_SIZE);
-	strcpy(device, "/dev/booga");
+	strcpy(device, "/dev/toyota");
 	minor = atoi(argv[1]);
 	if ((minor >= 0) && (minor < 4))
 		strcat(device, argv[1]);

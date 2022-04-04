@@ -1,6 +1,6 @@
 #!/bin/sh
-module="booga"
-device="booga"
+module="toyota"
+device="toyota"
 group="wheel"
 mode="666"
 
