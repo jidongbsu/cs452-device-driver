@@ -141,19 +141,18 @@ All files necessary for compilation and testing need to be submitted, this inclu
   - Each compiler warning will result in a 3 point deduction.
   - You are not allowed to suppress warnings
 
-- [70 pts] Main driver:
-  - Supports read properly:    30/30
-  - Use of /dev/random:             10/10
-  - Writing acts like /dev/null:    10/10
-  - Kill process writing to booga3: 10/10
-  - Proper use of semaphores:       10/10
+- [70 pts] Main driver: supports read properly, writing (to device 1 and 2) acts like /dev/null, kill process writing to booga3
+  - test1 produces expected results /10
+  - test2 produces expected results /20
+  - test3 produces expected results /20
+  - test4 produces expected results /20
 
-- [10 pts] Get Booga Stats from /proc
-  - Report on number bytes written/read: 5/5
-  - Report on strings :                  5/5
+- [10 pts] Module can be installed and removed without crashing the system:
+  - You won't get these points if your module doesn't implement any of the above functional requirements.
 
 - [10 pts] Documentation:
-  - README.md file (replace this current README.md with a new one using the template on the course page)
+  - README.md file: replace this current README.md with a new one using the template. Do not check in this current README.
+  - You are required to fill in every section of the README template, missing 1 section will result in a 2-point deduction.
 
 ## Related Exercises
 
