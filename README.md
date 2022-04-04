@@ -36,7 +36,7 @@ Note that the driver does not just return the above **result string** to the use
 
 For example, if the **result string** is *abc*, and if the user wants to read 9 bytes, then the final result that the read() function of your driver should return will be *abcabcabc*. 
 
-If case if the number of bytes requested by the user is not a multiple of the length of the **result string**, then the final result that your read() function returns may contain a part of the **result string**. Here are some examples:
+In case if the number of bytes requested by the user is not a multiple of the length of the **result string**, then the final result that your read() function returns may contain a part of the **result string**. Here are some examples:
 
 - if the **result string** is *abc*, and if the user wants to read 1 bytes, then the read() function of your driver should return *a*;
 - if the **result string** is *abc*, and if the user wants to read 4 bytes, then the read() function of your driver should return *abca*;
@@ -157,4 +157,4 @@ All files necessary for compilation and testing need to be submitted, this inclu
 
 ## Related Exercises
 
-A major part of your read() function is removing duplicate letters from a string, and return the smallest in lexicographical order result. This part is from the leetcode problem 316 - [Remove Duplicate Letters]{https://leetcode.com/problems/remove-duplicate-letters/}. You are highly recommended to solve this problem on leetcode first, and then port the code into the read function of your kernel driver.
+A major part of your read() function is removing duplicate letters from a string, and return the smallest in lexicographical order result. This part is from the leetcode problem 316 - [Remove Duplicate Letters](https://leetcode.com/problems/remove-duplicate-letters/). You are highly recommended to solve this problem on leetcode first, and then port the code into the read function of your kernel driver.
