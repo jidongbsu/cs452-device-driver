@@ -100,7 +100,7 @@ I used the following APIs:
 - copy_from_user();
 - copy_to_user();
 
-Read the README file of assignment one to see how to use them.
+Read the README file of assignment 1 (i.e., tesla) to see how to use them.
 
 - register_chrdev();
 - unregister_chrdev();
@@ -132,9 +132,10 @@ The second argument of *register_chrdev*(), which is *toyota*, tells the kernel 
 The third argument of *register_chrdev*(), which is *&toyota_fops*, tells the kernel, *toyota_fops*, which is *struct file_operations* variable, will be responsible for file operations on /dev/toyota (including /dev/toyota0, /dev/toyota1, ...). *toyota_fops* is defined as this:
 
 ```c
+/*  The different file operations.
+ *  Any member of this structure which we don't explicitly assign will be initialized to NULL by gcc. */
 static struct file_operations toyota_fops = {
     .owner = THIS_MODULE,
-    .llseek =     NULL,
     .read =       toyota_read,
     .write =      toyota_write,
     .open =       toyota_open,
@@ -160,6 +161,7 @@ Device drivers need to maintain a usage count, so that it can not be removed whe
 ```c
 static int toyota_open (struct inode *inode, struct file *filp){
     ...
+    /* increment the use count. */
     try_module_get(THIS_MODULE);
     return 0;          /* success */
 }
@@ -169,7 +171,8 @@ You can call *module_put*() like this in your release() function:
 ```c
 static int toyota_release (struct inode *inode, struct file *filp){
     ...
-	   module_put(THIS_MODULE);
+    /* decrement the use count. */
+    module_put(THIS_MODULE);
     return 0;
 }
 ```
