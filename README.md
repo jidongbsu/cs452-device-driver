@@ -1,63 +1,47 @@
 # Overview
 
-In this assignment, we will write a simple character driver called booga. You should still use the cs452 VM which you used for your tesla, lexus, and infiniti, as loading and unloading the kernel module requires the root privilege.
+In this assignment, we will write a simple device driver called toyota. You should still use the cs452 VM (username:cs452, password: cs452) which you used for your tesla, lexus, and infiniti, as loading and unloading the kernel module requires the root privilege.
 
-## Important notes
+## Learning Objectives
+
+- Learning how to write a simple device driver in a Linux system.
+- Practicing managing strings in C programming.
+- Practicing using a stack to solve programming problems.
+
+## Important Notes
 
 You MUST build against the kernel version (3.10.0-1160.el7.x86_64), which is the default version of the kernel installed on the cs452 VM.
+
+## Book References
+
+Operating Systems: Three Easy Pieces: [I/O Devices](https://pages.cs.wisc.edu/~remzi/OSTEP/file-devices.pdf)
+
+This chapter explains what roles I/O devices play in a computer system, and how device drivers in general, but in reality, every device is different, and its behavior is defined by the device vendor - the company who makes the device. Given that everyone's computer is different, it is not realistic for us to write a device driver for a specific device - your computer may not have this device. Thus in this assignment, we will just pretend that there is a device, and we allow applications to access this device via our device driver. And in this device driver, we will simulate the behavior of a device. In particular, we allow applications to open, read, write, close the device.
 
 # Specification
 
 ## The main driver
 
-The booga driver is a simple character driver that supports the open, read and write and close operations. The driver supports four minor numbers: 0, 1, 2, and 3. The device files are: /dev/booga0, /dev/booga1, /dev/booga2, /dev/booga3. We will also create a link from /dev/booga to /dev/booga0, so that acts as the default device when someone accesses /dev/booga. On reading from /dev/booga0, /dev/booga1, /dev/booga2 and /dev/booga3 the driver gives a stream of one of the following phrases:
+The booga driver is a simple character driver that supports the open, read and write and close operations. The driver supports four minor numbers: 0, 1, 2, and 3. The device files are: /dev/booga0, /dev/booga1, /dev/booga2, /dev/booga3. We will also create a link from /dev/booga to /dev/booga0, so that acts as the default device when someone accesses /dev/booga. 
 
-- booga! booga!
-- googoo! gaagaa!
-- neka! maka!
-- wooga! wooga!
+On writing to booga devices:
 
-Note that the driver may only output part of a phrase if the number of bytes requested by the user is not a multiple of the length of the chosen phrase.  Also each new phrase is separated from the previous one by a single space.
+- if a process tries to write /dev/booga1, /dev/booga2, the booga device driver works like  /dev/null (so it pretends to write the buffer but doesn't actually write to any device). 
+- if a process tries to write to /dev/booga3, it suffers from sudden death! You cannot call the system call kill() from inside the kernel space so you will have to figure out how to terminate a process from inside the kernel. Search the function kill_pid() in the kernel sources for ideas. Use the SIGTERM signal instead of SIGKILL for terminating the process.
+- if a process tries to write to /dev/booga0, the booga device driver must store the written data into an internal buffer - we assume applications only write a string to this device and we assume this string only contains lower case English letters.
 
-The driver is unpredictable as to what phrase it says. In order to simulate this behavior, we will use a random number generator. However, we cannot call any standard C library functions in the kernel (e.g. random()).  Linux actually has a device driver that generates strong random numbers by observing hardware noise, interrupts and other system activity. In the user space, the random device driver can be accessed via /dev/random. In your device driver code, you will need to include the header file <linux/random.h> and the function that you will call has the following prototype.
+On reading from /dev/booga0, /dev/booga1, /dev/booga2 and /dev/booga3 the driver will process the data (which is a string which is stored in the aforementioned internal buffer) in such a way: it removes duplicate letters from the string, so that every letter appears once and only once. You must make sure your result is the smallest in lexicographical order among all possible results. In this next paragraph, we will refer to this result as the **result string**.
 
-```c
-extern void get_random_bytes(void *buf, int nbytes);
-```
+Note that the driver does not just return the above **result string** to the user application. Rather, it returns a stream of the **result string**. 
 
-Here is a sample code on how to use the above function.
+For example, if the **result string** is *abc*, and if the user wants to read 9 bytes, then the final result that the read() function of your driver should return will be *abcabcabc*. 
 
-```c
-char randval;
-get_random_bytes(&randval, 1);
-choice = (randval & 0x7F) % 4; /* bitwise AND is to guarantee positive numbers */
-```
+If case if the number of bytes requested by the user is not a multiple of the length of the **result string**, then the final result that your read() function returns may contain a part of the **result string**. Here are some examples:
 
-On writing to booga devices /dev/booga0, /dev/booga1, /dev/booga2, the booga device driver works like  /dev/null (so it pretends to write the buffer but doesn't actually write to any device). However if a process tries to write to /dev/booga3, it suffers from sudden death! You cannot call the system call kill() from inside the kernel space so you will have to figure out how to terminate a process from inside the kernel. Search the function kill_pid() in the kernel sources for ideas. Use the SIGTERM signal instead of SIGKILL for terminating the process.
-
-## Get booga stats from /proc
-
-Create /proc entries for the booga driver. It reports on the number of bytes read/written since the driver was loaded, number of times it was opened from each supported minor number, and the number of times each of the four strings was selected. So if we output 1000 characters with the string “booga! booga!” in it, then we count that as one more instance of the phrase for this purpose. If the driver outputs an incomplete phrase, we will still count it as another instance of that phrase being selected. Here is a sample output.
-
-```console
-[user@localhost booga]# cat /proc/driver/booga
-bytes read = 300
-bytes written = 200
-number of opens:
-  /dev/booga0 = 4 times
-  /dev/booga1 = 0 times
-  /dev/booga2 = 1 times
-  /dev/booga3 = 1 times
-strings output:
-  booga! booga!  = 0 times
-  googoo! gaagaa!  = 1 times
-  neka! maka!  = 1 times
-  wooga! wooga!    = 1 times
-```
-
-## Thread-safety
-
-Protect the updating of structure used to track the statistics using semaphores. Refer to example driver code on the course page for an example on how to use semaphores in Linux kernel.
+- if the **result string** is *abc*, and if the user wants to read 1 bytes, then the read() function of your driver should return *a*;
+- if the **result string** is *abc*, and if the user wants to read 4 bytes, then the read() function of your driver should return *abca*;
+- if the **result string** is *abc*, and if the user wants to read 5 bytes, then the read() function of your driver should return *abcab*;
+- if the **result string** is *abc*, and if the user wants to read 10 bytes, then the read() function of your driver should return *abcabcabca*.
 
 ## Notes
 
@@ -140,20 +124,6 @@ Wrote 100 bytes.
 Attempting to write to booga device
 Terminated
 
-[user@localhost]$ cat /proc/driver/booga
-bytes read = 200  
-bytes written = 100  
-number of opens:
- /dev/simple0 = 3 times
- /dev/simple1 = 0 times
- /dev/simple2 = 0 times
- /dev/simple3 = 1 times
-strings output:
- booga! booga!  = 0 times
- googoo! gaga!  = 1 times
- wooga! wooga!  = 1 times
- neka! maka!    = 0 times
-
 [user@localhost]$ sudo ./booga_unload 
 ```
 
@@ -185,3 +155,6 @@ All files necessary for compilation and testing need to be submitted, this inclu
 - [10 pts] Documentation:
   - README.md file (replace this current README.md with a new one using the template on the course page)
 
+## Related Exercises
+
+A major part of your read() function is removing duplicate letters from a string, and return the smallest in lexicographical order result. This part is from the leetcode problem 316 - [Remove Duplicate Letters]{https://leetcode.com/problems/remove-duplicate-letters/}. You are highly recommended to solve this problem on leetcode first, and then port the code into the read function of your kernel driver.
