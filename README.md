@@ -91,6 +91,28 @@ static int __init toyota_init(void);
 static void __exit toyota_exit(void);
 ```
 
+In the remainder of this README file, the above six functions will be referred to as your *open*(), *release*(), *read*(), *write*(), *init*(), *exit*(), respectively.
+
+## Predefined Data Structures and Global Variables
+
+The starter code does not define any data structures. It does define two global variables (macros).
+
+```c
+#define TOYOTA_MAJOR 0   /* dynamic major by default */
+
+static int toyota_major = TOYOTA_MAJOR;
+```
+
+As you can see, *toyota_major* is initialized to 0. The use of *toyota_major* will be described in the next section. 
+
+```c
+#define TOYOTA_NR_DEVS 4    /* toyota0 through toyota3 */
+```
+
+This line says *TOYOTA_NR_DEVS* is 4, which is the number of devices this driver supports. The use of TOYOTA_NR_DEVS will be described in the next section.
+
+In addition, you may want to define your own global variables, for example, you may want to have a global variable to track which device is being access, and you may want to have a global buffer so that both *read*() and *write*() can access.
+
 ## Related Kernel APIs
 
 I used the following APIs:
@@ -100,7 +122,7 @@ I used the following APIs:
 - copy_from_user();
 - copy_to_user();
 
-Read the README file of assignment 1 (i.e., tesla) to see how to use them.
+Read the README file of assignment 1 (i.e., [tesla](https://github.com/jidongbsu/cs452-system-call)) to see how to use them. After call *kmalloc*(), you may want to use *memset*() to set the allocated memory to 0.
 
 - register_chrdev();
 - unregister_chrdev();
@@ -135,7 +157,7 @@ The third argument of *register_chrdev*(), which is *&toyota_fops*, tells the ke
 /*  The different file operations.
  *  Any member of this structure which we don't explicitly assign will be initialized to NULL by gcc. */
 static struct file_operations toyota_fops = {
-    .owner = THIS_MODULE,
+    .owner =      THIS_MODULE,
     .read =       toyota_read,
     .write =      toyota_write,
     .open =       toyota_open,
@@ -186,6 +208,16 @@ kill_pid(task_pid(current), SIGTERM, 1);
 
 Remember *current* in Linux kernel has a special meaning, it represents the current running process, and therefore you do not need to define/declare it.
 
+### string operation APIs
+
+You may need to use:
+
+- strlen();
+- strcat();
+- strncat();
+
+They are all available in kernel code - the Linux kernel re-implements them in the kernel space. You do not need to include any extra header files to use these functions. Use them in the kernel space the same way as you normally would in applications.
+
 ## Provided Helper Functions
 
 - NUM();
@@ -195,9 +227,10 @@ Your write() function will behave differently based on the minor number of the d
 static int toyota_open (struct inode *inode, struct file *filp)
 {
     int num = NUM(inode->i_rdev);
-    toyota_device->number = num;
 }
 ```
+
+You may also want to check to make sure this *num* is smaller than TOYOTA_NR_DEVS, which is 4; if not, your open() function can return *-ENODEV*, meaning no such a device.
 
 ## Debugging
 
