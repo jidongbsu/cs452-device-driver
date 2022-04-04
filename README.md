@@ -1,6 +1,6 @@
 # Overview
 
-In this assignment, we will write a simple device driver called toyota. You should still use the cs452 VM (username:cs452, password: cs452) which you used for your tesla, lexus, and infiniti, as loading and unloading the kernel module requires the root privilege.
+In this assignment, we will write a simple character device driver called toyota. You should still use the cs452 VM (username:cs452, password: cs452) which you used for your tesla, lexus, and infiniti, as loading and unloading the kernel module requires the root privilege.
 
 ## Learning Objectives
 
@@ -22,19 +22,38 @@ This chapter explains what roles I/O devices play in a computer system, and how 
 
 ## Background
 
-### Character Device vs Block Device
+### Character Devices vs Block Devices
 
-To be added soon.
+Linux systems define three types of devices.
+
+- character devices (also known as char device): character devices support access by characters, transferring data by characters or by bytes. Example: keyboard.
+
+- block devices: block devices support random access, transferring data by blocks (e.g. 4KB per block). Example: disk.
+
+- network devices: Linux considers most network devices as a special type, they belong to neither character devices nor block devices. Example: network interface card.
+
+In this assignment, we are writing a character device driver.
 
 ### Major Device Number vs Minor Device Number
 
-To be added soon.
+Linux systems use a pair of numbers to differentiate devices: major device number, minor device number. Take the following as an example,
+
+```console
+(base) [jidongxiao@onyx ~]$ ls -l /dev/sda*
+brw-rw----. 1 root disk 8, 0 Mar 21 08:26 /dev/sda
+brw-rw----. 1 root disk 8, 1 Mar 21 08:26 /dev/sda1
+brw-rw----. 1 root disk 8, 2 Mar 21 08:26 /dev/sda2
+brw-rw----. 1 root disk 8, 3 Mar 21 08:26 /dev/sda3
+```
+Each device in Unix/Linux systems has a corresponding file under the */dev* directory. */dev/sda* represents the hard disk. This disk currently has 3 partitions: */dev/sda1*, */dev/sda2*, */dev/sda3*. Linux reserves major number 8 for the driver of this disk, and then uses minor number 0 to represent the whole disk, uses minor number 1 to represent the first partition, uses minor number 2 to represent the second partition, uses minor number 3 to represent the third partition. In other words, if a device contains multiple members, then we use a different minor number to indicate each member.
 
 # Specification
 
 ## The Starter Code
 
 To be added soon.
+
+To install the module, run *make* and then *sudo insmod toyota.ko*; to remove it, run sudo *rmmod toyota*. Yes, in *rmmod*, whether or not you specify ko does not matter; but in *insmod*, you must have that ko.
 
 ## The Main Driver
 
