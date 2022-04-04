@@ -12,6 +12,8 @@ In this assignment, we will write a simple device driver called toyota. You shou
 
 You MUST build against the kernel version (3.10.0-1160.el7.x86_64), which is the default version of the kernel installed on the cs452 VM.
 
+In this assignment, we assume applications only access our device sequentially, in other words, you do not need to consider the case where multiple application processes/threads access the device concurrently. For example, if one program is reading or writing the device, then no other programs will be reading or writing the device at this same time.
+
 ## Book References
 
 Operating Systems: Three Easy Pieces: [I/O Devices](https://pages.cs.wisc.edu/~remzi/OSTEP/file-devices.pdf)
@@ -27,7 +29,7 @@ The toyota driver is a simple character driver that supports the open, read and 
 On writing to toyota devices:
 
 - if a process tries to write /dev/toyota1, /dev/toyota2, the toyota device driver works like  /dev/null (so it pretends to write the buffer but doesn't actually write to any device). 
-- if a process tries to write to /dev/toyota3, it suffers from sudden death! You cannot call the system call kill() from inside the kernel space so you will have to figure out how to terminate a process from inside the kernel. Search the function kill_pid() in the kernel sources for ideas. Use the SIGTERM signal instead of SIGKILL for terminating the process.
+- if a process tries to write to /dev/toyota3, it suffers from sudden death! You cannot call the system call kill() from inside the kernel space so you will have to figure out how to terminate a process from inside the kernel.
 - if a process tries to write to /dev/toyota0, the toyota device driver must store the written data into an internal buffer - we assume applications only write a string to this device and we assume this string only contains lower case English letters.
 
 On reading from /dev/toyota0, /dev/toyota1, /dev/toyota2 and /dev/toyota3 the driver will process the data (which is a string which is stored in the aforementioned internal buffer) in such a way: it removes duplicate letters from the string, so that every letter appears once and only once. You must make sure your result is the smallest in lexicographical order among all possible results. In this next paragraph, we will refer to this result as the **result string**.
