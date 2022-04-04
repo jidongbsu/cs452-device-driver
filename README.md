@@ -132,7 +132,7 @@ static int __init toyota_init(void){
 
 The above code registers this driver into the kernel. The kernel will assign an available major number (a number between 0 and 255) to this device/driver. If registration succeeds, *register_chrdev*() returns the assigned major number. Otherwise, *register_chrdev*() returns a negative value.
 
-The first argument of *register_chrdev*(): if this argument is non-zero, it means we want to specify one specific major number; if this argument is zero, it means we do not care what the number is, just assign us any number that is still available. Here we use *0*, which means we want to kernel to dynamically allocate one number to us. Remember, the assigned number will be the return value of *register_chrdev*(), and this same number needs to be passed to *unregister_chrdev*() as its first argument. This is why you are recommended to use a global variable to store this return value so that later on it can easily be passed to *unregister_chrdev*().
+The first argument of *register_chrdev*(): if this argument is non-zero, it means we want to specify one specific major number; if this argument is zero, it means we do not care what the number is, just assign us any number that is still available. Here we use *0*, which means we want the kernel to dynamically allocate one number to us. Remember, the assigned number will be the return value of *register_chrdev*(), and this same number needs to be passed to *unregister_chrdev*() as its first argument. This is why you are recommended to use a global variable to store this return value so that later on it can easily be passed to *unregister_chrdev*().
 
 The second argument of *register_chrdev*(), which is *toyota*, tells the kernel this driver is named as *toyota*.
 
