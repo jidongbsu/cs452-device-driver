@@ -1,6 +1,6 @@
 # Overview
 
-In this assignment, we will write a simple character device driver called toyota. You should still use the cs452 VM (username:cs452, password: cs452) which you used for your tesla, lexus, and infiniti, as loading and unloading the kernel module requires the root privilege.
+In this assignment, we will write a Linux kernel module called toyota. This module will serve as a simple character device driver. You should still use the cs452 VM (username:cs452, password: cs452) which you used for your tesla, lexus, and infiniti, as loading and unloading the kernel module requires the root privilege.
 
 ## Learning Objectives
 
@@ -136,7 +136,7 @@ The above code registers this driver into the kernel. The kernel will assign an 
 
 The first argument of *register_chrdev*(): if this argument is non-zero, it means we want to specify one specific major number; if this argument is zero, it means we do not care what the number is, just assign us any number that is still available. Here we use *0*, which means we want the kernel to dynamically allocate one number to us. Remember, the assigned number will be the return value of *register_chrdev*(), and this same number needs to be passed to *unregister_chrdev*() as its first argument. This is why you are recommended to use a global variable to store this return value so that later on it can easily be passed to *unregister_chrdev*().
 
-The second argument of *register_chrdev*(), which is *toyota*, tells the kernel this driver is named as *toyota*.
+The second argument of *register_chrdev*(), which is *toyota*, tells the kernel this driver is named as *toyota*. This name will then appear in */proc/devices* when the module is installed.
 
 The third argument of *register_chrdev*(), which is *&toyota_fops*, tells the kernel, *toyota_fops*, which is a *struct file_operations* variable, will be responsible for file operations on /dev/toyota (including /dev/toyota0, /dev/toyota1, /dev/toyota2, ...).. *toyota_fops* is defined as following:
 
