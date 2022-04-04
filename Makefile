@@ -1,20 +1,20 @@
 
 KERNEL_SOURCE=/lib/modules/`uname -r`/build
 
-all: booga test-booga
+all: toyota test-toyota
 
-booga:
+toyota:
 	 make -C ${KERNEL_SOURCE} M=`pwd` modules
 
-obj-m += booga.o
+obj-m += toyota.o
 
-test-booga: test-booga.o
+test-toyota: test-toyota.o
 	$(CC) $(CFLAGS) -o $@ $^
 	
 
 clean:
-	/bin/rm -f test-booga test-booga.o
-	/bin/rm -f .booga* booga.o booga.mod.c booga.mod.o booga.ko Module.* modules.*
+	/bin/rm -f test-toyota test-toyota.o
+	/bin/rm -f .toyota* toyota.o toyota.mod.c toyota.mod.o toyota.ko Module.* modules.*
 	/bin/rm -rf .tmp_versions/
 
 

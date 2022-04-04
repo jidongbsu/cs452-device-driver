@@ -31,7 +31,6 @@ MODULE_LICENSE("GPL");
 
 static int toyota_major = TOYOTA_MAJOR;
 static int toyota_nr_devs = TOYOTA_NR_DEVS;    /* number of bare toyota devices */
-static Toyota_Dev *toyota_device;
 
 static int toyota_open (struct inode *inode, struct file *filp);
 static int toyota_release (struct inode *inode, struct file *filp);
@@ -40,7 +39,7 @@ static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, l
 
 /*  The different file operations */
 static struct file_operations toyota_fops = {
-    .llseek =     NULL,
+    .owner =      THIS_MODULE,
     .read =       toyota_read,
     .write =      toyota_write,
     .open =       toyota_open,
