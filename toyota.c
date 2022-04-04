@@ -29,9 +29,6 @@
 MODULE_AUTHOR("Jidong Xiao"); /* change this line to your name */
 MODULE_LICENSE("GPL");
 
-static int toyota_major = TOYOTA_MAJOR;
-static int toyota_nr_devs = TOYOTA_NR_DEVS;    /* number of bare toyota devices */
-
 static int toyota_open (struct inode *inode, struct file *filp);
 static int toyota_release (struct inode *inode, struct file *filp);
 static ssize_t toyota_read (struct file *filp, char *buf, size_t count, loff_t *f_pos);
