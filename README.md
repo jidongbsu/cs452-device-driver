@@ -138,7 +138,7 @@ The first argument of *register_chrdev*(): if this argument is non-zero, it mean
 
 The second argument of *register_chrdev*(), which is *toyota*, tells the kernel this driver is named as *toyota*.
 
-The third argument of *register_chrdev*(), which is *&toyota_fops*, tells the kernel, *toyota_fops*, which is *struct file_operations* variable, will be responsible for file operations on /dev/toyota (including /dev/toyota0, /dev/toyota1, ...). *toyota_fops* is defined as this:
+The third argument of *register_chrdev*(), which is *&toyota_fops*, tells the kernel, *toyota_fops*, which is a *struct file_operations* variable, is associated with this device. *toyota_fops* is defined as following:
 
 ```c
 /*  The different file operations.
