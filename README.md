@@ -1,6 +1,6 @@
 # Overview
 
-In this assignment, we will write a simple device driver called toyota. You should still use the cs452 VM (username:cs452, password: cs452) which you used for your tesla, lexus, and infiniti, as loading and unloading the kernel module requires the root privilege.
+In this assignment, we will write a simple character device driver called toyota. You should still use the cs452 VM (username:cs452, password: cs452) which you used for your tesla, lexus, and infiniti, as loading and unloading the kernel module requires the root privilege.
 
 ## Learning Objectives
 
@@ -22,19 +22,38 @@ This chapter explains what roles I/O devices play in a computer system, and how 
 
 ## Background
 
-### Character Device vs Block Device
+### Character Devices vs Block Devices
 
-To be added soon.
+Linux systems define three types of devices.
+
+- character devices (also known as char device): character devices support access by characters, transferring data by characters or by bytes. Example: keyboard.
+
+- block devices: block devices support random access, transferring data by blocks (e.g. 4KB per block). Example: disk.
+
+- network devices: Linux considers most network devices as a special type, they belong to neither character devices nor block devices. Example: network interface card.
+
+In this assignment, we are writing a character device driver.
 
 ### Major Device Number vs Minor Device Number
 
-To be added soon.
+Linux systems use a pair of numbers to differentiate devices: major device number, minor device number. Take the following as an example,
+
+```console
+(base) [jidongxiao@onyx ~]$ ls -l /dev/sda*
+brw-rw----. 1 root disk 8, 0 Mar 21 08:26 /dev/sda
+brw-rw----. 1 root disk 8, 1 Mar 21 08:26 /dev/sda1
+brw-rw----. 1 root disk 8, 2 Mar 21 08:26 /dev/sda2
+brw-rw----. 1 root disk 8, 3 Mar 21 08:26 /dev/sda3
+```
+Each device in Unix/Linux systems has a corresponding file under the */dev* directory. */dev/sda* represents the hard disk. This disk currently has 3 partitions: */dev/sda1*, */dev/sda2*, */dev/sda3*. Linux reserves major number 8 for the driver of this disk, and then uses minor number 0 to represent the whole disk, uses minor number 1 to represent the first partition, uses minor number 2 to represent the second partition, uses minor number 3 to represent the third partition. In other words, if a device contains multiple members, then we use a different minor number to indicate each member.
 
 # Specification
 
 ## The Starter Code
 
 To be added soon.
+
+To install the module, run *make* and then *sudo insmod toyota.ko*; to remove it, run sudo *rmmod toyota*. Yes, in *rmmod*, whether or not you specify ko does not matter; but in *insmod*, you must have that ko.
 
 ## The Main Driver
 
@@ -72,6 +91,28 @@ static int __init toyota_init(void);
 static void __exit toyota_exit(void);
 ```
 
+In the remainder of this README file, the above six functions will be referred to as your *open*(), *release*(), *read*(), *write*(), *init*(), *exit*(), respectively.
+
+## Predefined Data Structures and Global Variables
+
+The starter code does not define any data structures. It does define two global variables (macros).
+
+```c
+#define TOYOTA_MAJOR 0   /* dynamic major by default */
+
+static int toyota_major = TOYOTA_MAJOR;
+```
+
+As you can see, *toyota_major* is initialized to 0. The use of *toyota_major* will be described in the next section. 
+
+```c
+#define TOYOTA_NR_DEVS 4    /* toyota0 through toyota3 */
+```
+
+This line says *TOYOTA_NR_DEVS* is 4, which is the number of devices this driver supports. The use of TOYOTA_NR_DEVS will be described in the next section.
+
+In addition, you may want to define your own global variables, for example, you may want to have a global variable to track which device is being access, and you may want to have a global buffer so that both *read*() and *write*() can access.
+
 ## Related Kernel APIs
 
 I used the following APIs:
@@ -81,17 +122,115 @@ I used the following APIs:
 - copy_from_user();
 - copy_to_user();
 
-Read the README file of assignment one to see how to use them.
+Read the README file of assignment 1 (i.e., [tesla](https://github.com/jidongbsu/cs452-system-call)) to see how to use them. After call *kmalloc*(), you may want to use *memset*() to set the allocated memory to 0.
 
 - register_chrdev();
 - unregister_chrdev();
+All drivers are eventually managed by the kernel, and we call register_chrdev() to register a char device driver with the kernel, and call *unregister_chrdev*() to unregister a char device driver from the kernel. To register, you can call *register_chrdev*() in your *init*() function like this:
+
+```c
+static int __init toyota_init(void){
+    int result;
+
+    /*
+     * register your major, and accept a dynamic number.
+     */
+    result = register_chrdev(toyota_major, "toyota", &toyota_fops);
+    if (result < 0) {
+        printk(KERN_WARNING "toyota: can't get major %d\n",toyota_major);
+        return result;
+    }
+    if (toyota_major == 0) toyota_major = result;
+    ...
+}
+```
+
+The above code registers this driver into the kernel. The kernel will assign an available major number (a number between 0 and 255) to this device/driver. If registration succeeds, *register_chrdev*() returns the assigned major number. Otherwise, *register_chrdev*() returns a negative value.
+
+The first argument of *register_chrdev*(), which is *toyota_major*, is a global variable initialized to 0, but we then use it to store the assigned major number, and later on we will pass this major number to *unregister_chrdev*().
+
+The second argument of *register_chrdev*(), which is *toyota*, tells the kernel this driver is named as *toyota*.
+
+The third argument of *register_chrdev*(), which is *&toyota_fops*, tells the kernel, *toyota_fops*, which is *struct file_operations* variable, will be responsible for file operations on /dev/toyota (including /dev/toyota0, /dev/toyota1, ...). *toyota_fops* is defined as this:
+
+```c
+/*  The different file operations.
+ *  Any member of this structure which we don't explicitly assign will be initialized to NULL by gcc. */
+static struct file_operations toyota_fops = {
+    .owner =      THIS_MODULE,
+    .read =       toyota_read,
+    .write =      toyota_write,
+    .open =       toyota_open,
+    .release =    toyota_release,
+};
+```
+
+This struct variable (together with the *register_chrdev*() function), tells the kernel: when users try to open /dev/toyota*, the kernel should call *toyota_open*(); when users try to close /dev/toyota*, the kernel should call *toyota_release*(); when users try to read from /dev/toyota*, the kernel should call *toyota_read*(); when users try to write to /dev/toyota*, the kernel should call *toyota_write*().
+
+You can then unregister the driver like this in your *exit*() function.
+```c
+static void __exit toyota_exit(void){
+	/* reverse the effect of register_chrdev(). */
+    unregister_chrdev(toyota_major, "toyota");
+    ...
+}    
+```
 
 - try_module_get();
 - module_put(); 
+Device drivers need to maintain a usage count, so that it can not be removed when it's in use. To this end, you can call *try_module_get*() in your *open*() function, and call *module_put*() in your *release*() function. You can call *try_module_get*() like this in your *open*() function,
+
+```c
+static int toyota_open (struct inode *inode, struct file *filp){
+    ...
+    /* increment the use count. */
+    try_module_get(THIS_MODULE);
+    return 0;          /* success */
+}
+```
+
+You can call *module_put*() like this in your release() function:
+```c
+static int toyota_release (struct inode *inode, struct file *filp){
+    ...
+    /* decrement the use count. */
+    module_put(THIS_MODULE);
+    return 0;
+}
+```
 
 - kill_pid();
+This function allows you to kill a process from the kernel level, you can call it like this:
+
+```c
+kill_pid(task_pid(current), SIGTERM, 1);
+```
+
+Remember *current* in Linux kernel has a special meaning, it represents the current running process, and therefore you do not need to define/declare it.
+
+### string operation APIs
+
+You may need to use:
+
+- strlen();
+- strcat();
+- strncat();
+
+They are all available in kernel code - the Linux kernel re-implements them in the kernel space. You do not need to include any extra header files to use these functions. Use them in the kernel space the same way as you normally would in applications.
+
+## Provided Helper Functions
 
 - NUM();
+Your write() function will behave differently based on the minor number of the device being accessed. To know the minor number of the accessed device, you can call *NUM*() like this:
+
+```c
+static int toyota_open (struct inode *inode, struct file *filp)
+{
+    int num = NUM(inode->i_rdev);
+}
+```
+
+You may also want to check to make sure this *num* is smaller than TOYOTA_NR_DEVS, which is 4; if not, your open() function can return *-ENODEV*, meaning no such a device.
 
 ## Debugging
 
