@@ -1,9 +1,8 @@
 /*
- * the toyota char module
+ * the toyota char device driver.
  */
 
 #include <linux/module.h>
-
 #include <linux/kernel.h> /* printk() */
 #include <linux/slab.h> /* for kmalloc() */
 #include <linux/version.h> /* for kmalloc() */
@@ -24,8 +23,6 @@
 
 #include "toyota.h"        /* local definitions */
 
-#define TOYOTA_DEBUG 1
-
 MODULE_AUTHOR("Jidong Xiao"); /* change this line to your name */
 MODULE_LICENSE("GPL");
 
@@ -34,7 +31,8 @@ static int toyota_release (struct inode *inode, struct file *filp);
 static ssize_t toyota_read (struct file *filp, char *buf, size_t count, loff_t *f_pos);
 static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, loff_t *f_pos);
 
-/*  The different file operations */
+/* The different file operations.
+ * Any member of this structure which we don't explicitly assign will be initialized to NULL by gcc. */
 static struct file_operations toyota_fops = {
     .owner =      THIS_MODULE,
     .read =       toyota_read,
@@ -44,7 +42,7 @@ static struct file_operations toyota_fops = {
 };
 
 /*
- * open
+ * open. if successful, return 0.
  */
 
 static int toyota_open (struct inode *inode, struct file *filp){
@@ -52,7 +50,7 @@ static int toyota_open (struct inode *inode, struct file *filp){
 }
 
 /*
- * close
+ * close. if successful, return 0.
  */
 
 static int toyota_release (struct inode *inode, struct file *filp){
@@ -63,6 +61,7 @@ static int toyota_release (struct inode *inode, struct file *filp){
  * pretends to ignore writes (like /dev/null) for minor numbers 1,2;
  * kill the calling process for minor number 3;
  * we assume applications will access our device sequentially, i.e., they do not access multiple devices concurrently.
+ * if successful, return count - user wants to write "count" bytes into this device.
  */
 static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, loff_t *f_pos){
 	return count;
@@ -71,21 +70,26 @@ static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, l
 /* when read, we do not care the device minor number,
  * we process whatever is in toyota_device->data, and return the processed string (maybe multiple times) to user.
  * we assume applications will access our device sequentially, i.e., they do not access multiple devices concurrently.
+ * if successful, return count - user wants to read "count" bytes from this device.
  */
 static ssize_t toyota_read (struct file *filp, char *buf, size_t count, loff_t *f_pos){
     return count;
 }
 
 /*
- * module initialization
+ * module initialization. if successful, return 0.
  */
 
 static int __init toyota_init(void){
+	/*
+	 * register your major, and accept a dynamic number.
+	 */
+    register_chrdev(0, "toyota", &toyota_fops);
 	return 0;
 }
 
 /*
- * module exit
+ * module exit. if successful, does not return anything.
  */
 
 static void __exit toyota_exit(void){
