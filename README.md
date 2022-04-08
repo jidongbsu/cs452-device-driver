@@ -60,9 +60,9 @@ Makefile  README.md  toyota.c  toyota.h  toyota_load  toyota-test1.c  toyota-tes
 
 You will be completing the toyota.c file. You should not modify the toyota.h file.
 
-**Warning**: To install the module, run *make* and then *sudo insmod toyota.ko*; to remove it, run sudo *rmmod toyota*. Yes, in *rmmod*, whether or not you specify ko does not matter; but in *insmod*, you must have that ko.
+**Warning**: In previous assignments, we learned that we can use *sudo insmod* to install a kernel module, and use *sudo rmmod* to remove the kernel module. Please do not use these two commands in this assignment. We have two scripts for you, to load the module, run *sudo ./toyota_load*, and to remove the module, run *sudo ./toyota_unload*. *toyota_load* does two things: install the module, and then created device files (/dev/toyota0, /dev/toyota1, /dev/toyota2, /dev/toyota3); *toyota_unload* does two things: remove the module, and then delete these 4 device files.
 
-Four testing programs (toyota-test[1-4].c) are provided. Refer to the expected results section to see what are expected when running these testing programs.
+Four testing programs (toyota-test[1-4].c) are provided. Refer to the [Expected Results](#expected results) section to see what are expected when running these testing programs.
 
 ## The Main Driver
 
@@ -268,7 +268,7 @@ gcc  -o toyota-test4 toyota-test4.o
 
 After the above, you can then run tests.
 
-- When running *toyota-test1*, you are expected to get:
+- When running *toyota-test1*, you are expected to get (exactly):
 
 ```console
 [cs452@localhost device-driver]$ ./toyota-test1
@@ -284,7 +284,7 @@ Attempting to write to toyota device
 Terminated
 ```
 
-- When running *toyota-test2*, you are expected to get:
+- When running *toyota-test2*, you are expected to get (exactly):
 
 ```console
 [cs452@localhost device-driver]$ ./toyota-test2
@@ -298,18 +298,18 @@ wrote 12 bytes: toyotatacomaa
 read 6 bytes: oyatcm
 ```
 
-- When running *toyota-test3*, you are expected to get:
+- When running *toyota-test3*, you are expected to get (exactly):
 
 ```console
 [cs452@localhost device-driver]$ ./toyota-test3
 wrote 5 bytes: bcabc
-read 3 bytes: abc
-wrote 13 bytes: toyotacorolla
-read 7 bytes: oytacrl
-wrote 11 bytes: toyotacamryla
-read 7 bytes: otacmry
-wrote 12 bytes: toyotatacomaa
-read 6 bytes: oyatcm
+read 6 bytes: abcabc
+wrote 8 bytes: cbacdcbc
+read 6 bytes: acdbac
+wrote 11 bytes: bcbcbcababa
+read 6 bytes: bcabca
+wrote 86 bytes: tknvntfipavdqjiyslpdlokuymbutpynnxqekoktlqzrhoyvbewklzuamhwtqygsiakymyqwqiqtouynaiowwf
+read 25 bytes: adjbpnxeklqrhovwzgsimtuyf
 ```
 
 - When running *toyota-test4*, you are expected to get a huge number of "abc"s like this:
