@@ -62,7 +62,7 @@ You will be completing the toyota.c file. You should not modify the toyota.h fil
 
 **Warning**: In previous assignments, we learned that we can use *sudo insmod* to install a kernel module, and use *sudo rmmod* to remove the kernel module. Please do not use these two commands in this assignment. We have two scripts for you, to load the module, run *sudo ./toyota_load*, and to remove the module, run *sudo ./toyota_unload*. *toyota_load* does two things: install the module, and then created device files (/dev/toyota0, /dev/toyota1, /dev/toyota2, /dev/toyota3); *toyota_unload* does two things: remove the module, and then delete these 4 device files.
 
-Four testing programs (toyota-test[1-4].c) are provided. Refer to the [Expected Results](#expected results) section to see what are expected when running these testing programs.
+Four testing programs (toyota-test[1-4].c) are provided. Refer to the [Expected Results](#expected-results) section to see what are expected when running these testing programs.
 
 ## The Main Driver
 
