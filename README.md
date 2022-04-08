@@ -18,7 +18,7 @@ In this assignment, we assume applications only access our device sequentially, 
 
 Operating Systems: Three Easy Pieces: [I/O Devices](https://pages.cs.wisc.edu/~remzi/OSTEP/file-devices.pdf).
 
-This chapter explains what roles I/O devices play in a computer system, and how device drivers in general, but in reality, every device is different, and its behavior is defined by the device vendor - the company who makes the device. Given that everyone's computer is different, it is not realistic for us to write a device driver for a specific device - your computer may not have this device. Thus in this assignment, we will just pretend that there is a device, and we allow applications to access this device via our device driver. And in this device driver, we will simulate the behavior of a device. In particular, we allow applications to open, read, write, close the device.
+This chapter explains what roles I/O devices play in a computer system, and how device drivers work in general, but in reality, every device is different, and its behavior is defined by the device vendor - the company who makes the device. Given that everyone's computer is different, it is not realistic for us to write a device driver for a specific device - your computer may not have this device. Thus in this assignment, we will just pretend that there is a device, and we allow applications to access this device via our device driver. And in this device driver, we will simulate the behavior of a device. In particular, we allow applications to open, read, write, close the device.
 
 ## Background
 
@@ -36,7 +36,7 @@ In this assignment, we are writing a character device driver.
 
 ### Major Device Number vs Minor Device Number
 
-Linux systems use a pair of numbers to differentiate devices: major device number, minor device number. Take the following as an example,
+Linux systems use a pair of numbers to differentiate devices: major device number and minor device number. Take the following as an example,
 
 ```console
 (base) [jidongxiao@onyx ~]$ ls -l /dev/sda*
@@ -45,7 +45,7 @@ brw-rw----. 1 root disk 8, 1 Mar 21 08:26 /dev/sda1
 brw-rw----. 1 root disk 8, 2 Mar 21 08:26 /dev/sda2
 brw-rw----. 1 root disk 8, 3 Mar 21 08:26 /dev/sda3
 ```
-Each device in Unix/Linux systems has a corresponding file under the */dev* directory. */dev/sda* represents the hard disk. This disk currently has 3 partitions: */dev/sda1*, */dev/sda2*, */dev/sda3*. Linux reserves major number 8 for the driver of this disk, and then uses minor number 0 to represent the whole disk, uses minor number 1 to represent the first partition, uses minor number 2 to represent the second partition, uses minor number 3 to represent the third partition. In other words, if a device contains multiple members, then we use a different minor number to indicate each member.
+Each device in Unix/Linux systems has a corresponding file under the */dev* directory. Here, */dev/sda* represents the hard disk. This disk currently has 3 partitions: */dev/sda1*, */dev/sda2*, */dev/sda3*. Linux kernel reserves major number 8 for the driver of this disk, and then uses minor number 0 to represent the whole disk, uses minor number 1 to represent the first partition, uses minor number 2 to represent the second partition, uses minor number 3 to represent the third partition. In other words, if a device contains multiple members, then we use a different minor number to indicate each member.
 
 # Specification
 
@@ -60,21 +60,21 @@ Makefile  README.md  toyota.c  toyota.h  toyota_load  toyota-test1.c  toyota-tes
 
 You will be completing the toyota.c file. You should not modify the toyota.h file.
 
-**Warning**: In previous assignments, we learned that we can use *sudo insmod* to install a kernel module, and use *sudo rmmod* to remove the kernel module. Please do not use these two commands in this assignment. We have two scripts for you, to load the module, run *sudo ./toyota_load*, and to remove the module, run *sudo ./toyota_unload*. *toyota_load* does two things: install the module, and then created device files (/dev/toyota0, /dev/toyota1, /dev/toyota2, /dev/toyota3); *toyota_unload* does two things: remove the module, and then delete these 4 device files.
+**Warning**: In previous assignments, we learned that we can use *sudo insmod* to install a kernel module, and use *sudo rmmod* to remove the kernel module. Please do not use these two commands in this assignment. We have two scripts for you: to load the module, run *sudo ./toyota_load*, and to remove the module, run *sudo ./toyota_unload*. *toyota_load* does two things: install the module, and then created device files (/dev/toyota0, /dev/toyota1, /dev/toyota2, /dev/toyota3); *toyota_unload* does two things: remove the module, and then delete these 4 device files.
 
 Four testing programs (toyota-test[1-4].c) are provided. Refer to the [Expected Results](#expected-results) section to see what are expected when running these testing programs.
 
-## The Main Driver
+## Driver Requirement
 
-The toyota driver is a simple character driver that supports the open, read and write and close operations. The driver supports four minor numbers: 0, 1, 2, and 3. The device files are: /dev/toyota0, /dev/toyota1, /dev/toyota2, /dev/toyota3. We will also create a link from /dev/toyota to /dev/toyota0, so that acts as the default device when someone accesses /dev/toyota. 
+The toyota driver is a simple character driver that supports the open, read, write and close operations. The driver supports four minor numbers: 0, 1, 2, and 3. The device files are: /dev/toyota0, /dev/toyota1, /dev/toyota2, /dev/toyota3. We will also create a link from /dev/toyota to /dev/toyota0, so that /dev/toyota0 acts as the default device when someone accesses /dev/toyota. The following describes how this drive should behave:
 
 On writing to toyota devices:
 
-- if a process tries to write /dev/toyota1, /dev/toyota2, the toyota device driver works like  /dev/null (so it pretends to write the buffer but doesn't actually write to any device). 
-- if a process tries to write to /dev/toyota3, it suffers from sudden death! You cannot call the system call kill() from inside the kernel space so you will have to figure out how to terminate a process from inside the kernel.
+- if a process tries to write /dev/toyota1, /dev/toyota2, the toyota device driver works like /dev/null - it pretends to write the buffer but doesn't actually write to any device. 
+- if a process tries to write to /dev/toyota3, it suffers from sudden death! Keep reading this README, and you will find out which function you can use to achieve this.
 - if a process tries to write to /dev/toyota0, the toyota device driver must store the written data into an internal buffer - we assume applications only write a string to this device and we assume this string only contains lower case English letters.
 
-On reading from /dev/toyota0, /dev/toyota1, /dev/toyota2 and /dev/toyota3 the driver will process the data (which is a string which is stored in the aforementioned internal buffer) in such a way: it removes duplicate letters from the string, so that every letter appears once and only once. You must make sure your result is the smallest in lexicographical order among all possible results. In this next paragraph, we will refer to this result as the **result string**.
+On reading from /dev/toyota0, /dev/toyota1, /dev/toyota2 and /dev/toyota3, the driver will process the data (which is a string which is stored in the aforementioned internal buffer) in such a way: it removes duplicate letters from the string, so that every letter appears once and only once. You must make sure your result is the smallest in lexicographical order among all possible results. In this next paragraph, we will refer to this result as the **result string**.
 
 Note that the driver does not just return the above **result string** to the user application. Rather, it returns a stream of the **result string**. 
 
@@ -89,7 +89,7 @@ In case if the number of bytes requested by the user is not a multiple of the le
 
 ## Functions You Need to Implement
 
-Here are the prototypes of the functions that your driver would need to implement in toyota.c.
+Here are the prototypes of the functions that you need to implement in toyota.c.
 
 ```c
 static int toyota_open (struct inode *inode, struct file *filp);
@@ -108,7 +108,7 @@ The starter code does not define any data structures. It defines one global vari
 
 You are recommended to define 3 global variables.
 
-- you may want to have a global integer variable to track which device is being access, 
+- you may want to have a global integer variable to track which device is being access: 0,1,2, or 3?
 - you may want to have a global buffer (or a global pointer) so that both *read*() and *write*() can access.
 - you may want to have a global integer variable to track the major device number.
 
@@ -234,7 +234,7 @@ Note that the kernel print messages will not show on the screen. The messages ar
 # sudo tail -f /var/log/messages
 ```
 
-Alternatively,  you can use the command:
+Alternatively, you can use the command:
 
 ```console
 # sudo dmesg --follow
@@ -335,7 +335,7 @@ Due: 23:59pm, April 21st, 2022. Late submission will not be accepted/graded.
 
 ## Project Layout
 
-All files necessary for compilation and testing need to be submitted, this includes source code files, header files, Makefile, and bash scripts. The structure of the submission folder should be the same as what was given to you.
+All files necessary for compilation and testing need to be submitted, this includes source code files, header files, and Makefile. The structure of the submission folder should be the same as what was given to you.
 
 ## Grading Rubric (Undergraduate and Graduate)
 
@@ -343,7 +343,7 @@ All files necessary for compilation and testing need to be submitted, this inclu
   - Each compiler warning will result in a 3 point deduction.
   - You are not allowed to suppress warnings
 
-- [70 pts] Main driver: supports read properly, writing (to device 1 and 2) acts like /dev/null, kill process writing to toyota3
+- [70 pts] Main driver: supports read properly, writing (to device 1 and 2) acts like /dev/null, kill process writing to /dev/toyota3.
   - toyota-test1 produces expected results /10
   - toyota-test2 produces expected results /20
   - toyota-test3 produces expected results /20
