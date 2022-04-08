@@ -18,7 +18,7 @@ In this assignment, we assume applications only access our device sequentially, 
 
 Operating Systems: Three Easy Pieces: [I/O Devices](https://pages.cs.wisc.edu/~remzi/OSTEP/file-devices.pdf).
 
-This chapter explains what roles I/O devices play in a computer system, and how device drivers work in general, but in reality, every device is different, and its behavior is defined by the device vendor - the company who makes the device. Given that everyone's computer is different, it is not realistic for us to write a device driver for a specific device - your computer may not have this device. Thus in this assignment, we will just pretend that there is a device, and we allow applications to access this device via our device driver. And in this device driver, we will simulate the behavior of a device. In particular, we allow applications to open, read, write, close the device.
+This chapter explains what roles I/O devices play in a computer system, and how device drivers work in general, but in reality, every device is different, and its behavior is defined by the device vendor - the company who makes the device. Given that everyone's computer is different, it is not realistic for us to write a device driver for a specific device - your computer may not have this device. Thus in this assignment, we will just pretend that there is a device, and we allow applications to access this device via our device driver. And in this device driver, we will simulate the behavior of a device. In particular, we allow applications to open, read, write, and close the device.
 
 ## Background
 
@@ -45,7 +45,7 @@ brw-rw----. 1 root disk 8, 1 Mar 21 08:26 /dev/sda1
 brw-rw----. 1 root disk 8, 2 Mar 21 08:26 /dev/sda2
 brw-rw----. 1 root disk 8, 3 Mar 21 08:26 /dev/sda3
 ```
-Each device in Unix/Linux systems has a corresponding file under the */dev* directory. Here, */dev/sda* represents the hard disk. This disk currently has 3 partitions: */dev/sda1*, */dev/sda2*, */dev/sda3*. Linux kernel reserves major number 8 for the driver of this disk, and then uses minor number 0 to represent the whole disk, uses minor number 1 to represent the first partition, uses minor number 2 to represent the second partition, uses minor number 3 to represent the third partition. In other words, if a device contains multiple members, then we use a different minor number to indicate each member.
+Each device in Unix/Linux systems has a corresponding file under the */dev* directory. Here, */dev/sda* represents the hard disk. This disk currently has 3 partitions: */dev/sda1*, */dev/sda2*, */dev/sda3*. Linux kernel reserves major number 8 for the driver of this disk, and then uses minor number 0 to represent the whole disk, uses minor number 1 to represent the first partition, uses minor number 2 to represent the second partition, and uses minor number 3 to represent the third partition. In other words, if a device contains multiple members, then we use a different minor number to indicate each member.
 
 # Specification
 
@@ -108,7 +108,7 @@ The starter code does not define any data structures. It defines one global vari
 
 You are recommended to define 3 global variables.
 
-- you may want to have a global integer variable to track which device is being access: 0,1,2, or 3?
+- you may want to have a global integer variable to track which device is being accessed: 0,1,2, or 3?
 - you may want to have a global buffer (or a global pointer) so that both *read*() and *write*() can access.
 - you may want to have a global integer variable to track the major device number.
 
@@ -121,7 +121,7 @@ I used the following APIs:
 - copy_from_user();
 - copy_to_user();
 
-Read the README file of assignment 1 (i.e., [tesla](https://github.com/jidongbsu/cs452-system-call)) to see how to use them. After call *kmalloc*(), you may want to use *memset*() to set the allocated memory to 0.
+Read the README file of assignment 1 (i.e., [tesla](https://github.com/jidongbsu/cs452-system-call)) to see how to use them. After calling *kmalloc*(), you may want to use *memset*() to set the allocated memory to 0.
 
 - register_chrdev();
 - unregister_chrdev();
@@ -358,4 +358,4 @@ All files necessary for compilation and testing need to be submitted, this inclu
 
 ## Related Exercises
 
-A major part of your read() function is removing duplicate letters from a string, and return the smallest in lexicographical order result. This part is from the leetcode problem 316 - [Remove Duplicate Letters](https://leetcode.com/problems/remove-duplicate-letters/). You are highly recommended to solve this problem on leetcode first, and then port the code into the read function of your kernel driver.
+A major part of your read() function is removing duplicate letters from a string, and returning the smallest in lexicographical order result. This part is from the leetcode problem 316 - [Remove Duplicate Letters](https://leetcode.com/problems/remove-duplicate-letters/). You are highly recommended to solve this problem on leetcode first, and then port the code into the read function of your kernel driver.
