@@ -51,11 +51,18 @@ Each device in Unix/Linux systems has a corresponding file under the */dev* dire
 
 ## The Starter Code
 
-To be added soon.
+The starter code looks like this:
+
+```console
+[cs452@localhost cs452-device-driver]$ ls
+Makefile  README.md  toyota.c  toyota.h  toyota_load  toyota-test1.c  toyota-test2.c  toyota-test3.c  toyota-test4.c  toyota_unload
+```
 
 You will be completing the toyota.c file. You should not modify the toyota.h file.
 
-To install the module, run *make* and then *sudo insmod toyota.ko*; to remove it, run sudo *rmmod toyota*. Yes, in *rmmod*, whether or not you specify ko does not matter; but in *insmod*, you must have that ko.
+**Warning**: To install the module, run *make* and then *sudo insmod toyota.ko*; to remove it, run sudo *rmmod toyota*. Yes, in *rmmod*, whether or not you specify ko does not matter; but in *insmod*, you must have that ko.
+
+Four testing programs (toyota-test[1-4].c) are provided. Refer to the expected results section to see what are expected when running these testing programs.
 
 ## The Main Driver
 
@@ -233,67 +240,93 @@ Alternatively,  you can use the command:
 # sudo dmesg --follow
 ```
 
-## Testing
+## Expected Results
 
-We have provided a test program called test-toyota.c. We will use this program to test the driver. While testing your program, the following situations may arise:
-
-- The system hangs and you have to hit the reset button
-- The system spontaneously reboots. Oops!
-- The kernel prints an oops message (a milder version of the infamous General Protection Fault). You will get a stack trace with it that should help in narrowing down the cause
-
-Once you run make, your compiler will compile test-toyota.c into a binary called test-toyota. Two scripts are provided for testing - they will call test-toyota. Run toyota-test1.sh to test regular functionalities of your driver, and run toyota-test2.sh to test if your driver is thread-safe or not.
-
-Here is a sample session with the toyota driver. Note that the characters returned by the driver do not contain any newline characters. The output shown below was reformatted slightly for this document.
+In order to run any tests, you need to first run *make* to compile everything, and then run *sudo ./toyota_load* - this command will install the module and create corresponding device files.
 
 ```console
-[user@localhost]$ make
+[cs452@localhost device-driver]$ make
 make -C /lib/modules/`uname -r`/build M=`pwd` modules
-make[1]: Entering directory '/usr/src/kernels/4.14.11-200.fc26.x86_64'
- CC [M]  /home/user/Documents/classes/cs453/github/CS453/projects/p5/grader/solutions/user/toyota.o
- Building modules, stage 2.
- MODPOST 1 modules
- CC      /home/user/Documents/classes/cs453/github/CS453/projects/p5/grader/solutions/user/toyota.mod.o
- LD [M]  /home/user/Documents/classes/cs453/github/CS453/projects/p5/grader/solutions/user/toyota.ko
-make[1]: Leaving directory '/usr/src/kernels/4.14.11-200.fc26.x86_64'
-cc    -c -o test-toyota.o test-toyota.c
-cc  -o test-toyota test-toyota.o
+make[1]: Entering directory `/usr/src/kernels/3.10.0-1160.el7.x86_64'
+  CC [M]  /home/cs452/device-driver/toyota.o
+  Building modules, stage 2.
+  MODPOST 1 modules
+  CC      /home/cs452/device-driver/toyota.mod.o
+  LD [M]  /home/cs452/device-driver/toyota.ko
+make[1]: Leaving directory `/usr/src/kernels/3.10.0-1160.el7.x86_64'
+gcc    -c -o toyota-test1.o toyota-test1.c
+gcc  -o toyota-test1 toyota-test1.o
+gcc    -c -o toyota-test2.o toyota-test2.c
+gcc  -o toyota-test2 toyota-test2.o
+gcc    -c -o toyota-test3.o toyota-test3.c
+gcc  -o toyota-test3 toyota-test3.o
+gcc    -c -o toyota-test4.o toyota-test4.c
+gcc  -o toyota-test4 toyota-test4.o
+[cs452@localhost device-driver]$ sudo ./toyota_load 
+[sudo] password for cs452: 
+```
 
-[user@localhost]$ ls
-toyota.c   toyota_load   toyota.o         toyota_unload   Module.symvers  test-toyota.c
-toyota.h   toyota.mod.c  toyota-test1.sh  Makefile       README.md       test-toyota.o
-toyota.ko  toyota.mod.o  toyota-test2.sh  modules.order  test-toyota
-[user@localhost ]$
+After the above, you can then run tests.
 
-[user@localhost]$ sudo ./toyota_load       
-[sudo] password for user:  
+- When running *toyota-test1*, you are expected to get:
 
-[user@localhost]$ /sbin/lsmod  
-Module                  Size  Used by
-toyota                  16384  0
-bluetooth             593920  0
-ecdh_generic           24576  1 bluetooth
-rfkill                 28672  2 bluetooth
-ipt_MASQUERADE         16384  1
-nf_nat_masquerade_ipv4    16384  1 ipt_MASQUERADE
-. . .
-
-[user@localhost]$ ./test-toyota 0 100 read
-Read returned 100 characters
-wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! wooga! Wo
-
-[user@localhost]$ ./test-toyota 0 100 read
-Read returned 100 characters
-googoo! gaga! googoo! gaga! googoo! gaga! googoo! gaga! googoo! gaga! googoo! gaga! googoo! gaga! go
-
-[user@localhost]$ ./test-toyota 0 100 write
+```console
+[cs452@localhost device-driver]$ ./toyota-test1
 Attempting to write to toyota device
-Wrote 100 bytes.
+Wrote 1000 bytes.
+Read failed:
 
-[user@localhost]$ ./test-toyota 3 100 write  
+Attempting to write to toyota device
+Wrote 1000 bytes.
+Read failed:
+
 Attempting to write to toyota device
 Terminated
+```
 
-[user@localhost]$ sudo ./toyota_unload 
+- When running *toyota-test2*, you are expected to get:
+
+```console
+[cs452@localhost device-driver]$ ./toyota-test2
+wrote 5 bytes: bcabc
+read 3 bytes: abc
+wrote 13 bytes: toyotacorolla
+read 7 bytes: oytacrl
+wrote 11 bytes: toyotacamryla
+read 7 bytes: otacmry
+wrote 12 bytes: toyotatacomaa
+read 6 bytes: oyatcm
+```
+
+- When running *toyota-test3*, you are expected to get:
+
+```console
+[cs452@localhost device-driver]$ ./toyota-test3
+wrote 5 bytes: bcabc
+read 3 bytes: abc
+wrote 13 bytes: toyotacorolla
+read 7 bytes: oytacrl
+wrote 11 bytes: toyotacamryla
+read 7 bytes: otacmry
+wrote 12 bytes: toyotatacomaa
+read 6 bytes: oyatcm
+```
+
+- When running *toyota-test4*, you are expected to get a huge number of "abc"s like this:
+
+```console
+[cs452@localhost device-driver]$ ./toyota-test4
+wrote 5 bytes: bcabc
+read 200000 bytes: abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab
+... (omitted)
+cabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcab
+```
+
+After all these tests, you should run *sudo ./toyota_unload*, which will remove the module and delete device files. 
+
+```console
+[cs452@localhost device-driver]$ sudo ./toyota_unload 
+[sudo] password for cs452: 
 ```
 
 ## Submission
@@ -311,10 +344,10 @@ All files necessary for compilation and testing need to be submitted, this inclu
   - You are not allowed to suppress warnings
 
 - [70 pts] Main driver: supports read properly, writing (to device 1 and 2) acts like /dev/null, kill process writing to toyota3
-  - test1 produces expected results /10
-  - test2 produces expected results /20
-  - test3 produces expected results /20
-  - test4 produces expected results /20
+  - toyota-test1 produces expected results /10
+  - toyota-test2 produces expected results /20
+  - toyota-test3 produces expected results /20
+  - toyota-test4 produces expected results /20
 
 - [10 pts] Module can be installed and removed without crashing the system:
   - You won't get these points if your module doesn't implement any of the above functional requirements.

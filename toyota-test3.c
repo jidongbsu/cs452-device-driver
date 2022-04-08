@@ -72,37 +72,37 @@ int main(int argc, char **argv)
 	strncpy(buf, "bcabc", bufsize);
 	run_write_test(device, bufsize);
 	free(buf);
-	bufsize=3;
+	bufsize=6;
 	buf = (char *)malloc(sizeof(char)*(bufsize+1));
 	run_read_test(device, bufsize);
 	free(buf);
 
-	bufsize=13;
+	bufsize=8;
 	buf = (char *)malloc(sizeof(char)*(bufsize+1));
-	strncpy(buf, "toyotacorolla", bufsize);
+	strncpy(buf, "cbacdcbc", bufsize);
 	run_write_test(device, bufsize);
 	free(buf);
-	bufsize=7;
+	bufsize=6;
 	buf = (char *)malloc(sizeof(char)*(bufsize+1));
 	run_read_test(device, bufsize);
 	free(buf);
 
 	bufsize=11;
 	buf = (char *)malloc(sizeof(char)*(bufsize+1));
-	strncpy(buf, "toyotacamry", bufsize);
+	strncpy(buf, "bcbcbcababa", bufsize);
 	run_write_test(device, bufsize);
 	free(buf);
-	bufsize=7;
+	bufsize=6;
 	buf = (char *)malloc(sizeof(char)*(bufsize+1));
 	run_read_test(device, bufsize);
 	free(buf);
 
-	bufsize=12;
+	bufsize=86;
 	buf = (char *)malloc(sizeof(char)*(bufsize+1));
-	strncpy(buf, "toyotatacoma", bufsize);
+	strncpy(buf, "tknvntfipavdqjiyslpdlokuymbutpynnxqekoktlqzrhoyvbewklzuamhwtqygsiakymyqwqiqtouynaiowwf", bufsize);
 	run_write_test(device, bufsize);
 	free(buf);
-	bufsize=6;
+	bufsize=25;
 	buf = (char *)malloc(sizeof(char)*(bufsize+1));
 	run_read_test(device, bufsize);
 	free(buf);
