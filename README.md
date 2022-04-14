@@ -64,15 +64,15 @@ You will be completing the toyota.c file. You should not modify the toyota.h fil
 
 Four testing programs (toyota-test[1-4].c) are provided. Refer to the [Expected Results](#expected-results) section to see what are expected when running these testing programs.
 
-## Driver Requirement
+## Driver Requirements
 
-The toyota driver is a simple character driver that supports the open, read, write and close operations. The driver supports four minor numbers: 0, 1, 2, and 3. The device files are: /dev/toyota0, /dev/toyota1, /dev/toyota2, /dev/toyota3. We will also create a link from /dev/toyota to /dev/toyota0, so that /dev/toyota0 acts as the default device when someone accesses /dev/toyota. The following describes how this drive should behave:
+The toyota driver is a simple character driver that supports the open, read, write and close operations. The driver supports four minor numbers: 0, 1, 2, and 3. The device files are: /dev/toyota0, /dev/toyota1, /dev/toyota2, /dev/toyota3. We will also create a link from /dev/toyota to /dev/toyota0, so that /dev/toyota0 acts as the default device when someone accesses /dev/toyota. The following describes how this driver should behave:
 
 On writing to toyota devices:
 
-- if a process tries to write /dev/toyota1, /dev/toyota2, the toyota device driver works like /dev/null - it pretends to write the buffer but doesn't actually write to any device. 
+- if a process tries to write /dev/toyota1 or /dev/toyota2, the toyota device driver works like /dev/null - it pretends to write a buffer but doesn't actually write to any device. 
 - if a process tries to write to /dev/toyota3, it suffers from sudden death! Keep reading this README, and you will find out which function you can use to achieve this.
-- if a process tries to write to /dev/toyota0, the toyota device driver must store the written data into an internal buffer - we assume applications only write a string to this device and we assume this string only contains lower case English letters.
+- if a process tries to write to /dev/toyota0, the toyota device driver must store the written data into an internal buffer - we assume applications (upon each write operation) only write one string to this device and we assume this string only contains lower case English letters.
 
 On reading from /dev/toyota0, /dev/toyota1, /dev/toyota2 and /dev/toyota3, the driver will process the data (which is a string which is stored in the aforementioned internal buffer) in such a way: it removes duplicate letters from the string, so that every letter appears once and only once. You must make sure your result is the smallest in lexicographical order among all possible results. In this next paragraph, we will refer to this result as the **result string**.
 
@@ -139,13 +139,13 @@ static int __init toyota_init(void){
 }
 ```
 
-The above code registers this driver into the kernel. The kernel will assign an available major number (a number between 0 and 255) to this device/driver. If registration succeeds, *register_chrdev*() returns the assigned major number. Otherwise, *register_chrdev*() returns a negative value.
+The above code registers this driver into the kernel. The kernel will assign an available major number (a number between 0 and 255) to this device/driver. If the registration succeeds, *register_chrdev*() returns the assigned major number. Otherwise, *register_chrdev*() returns a negative value.
 
 The first argument of *register_chrdev*(): if this argument is non-zero, it means we want to specify one specific major number; if this argument is zero, it means we do not care what the number is, just assign us any number that is still available. Here we use *0*, which means we want the kernel to dynamically allocate one number to us. Remember, the assigned number will be the return value of *register_chrdev*(), and this same number needs to be passed to *unregister_chrdev*() as its first argument. This is why you are recommended to use a global variable to store this return value so that later on it can easily be passed to *unregister_chrdev*().
 
 The second argument of *register_chrdev*(), which is *toyota*, tells the kernel this driver is named as *toyota*. This name will then appear in */proc/devices* when the module is installed.
 
-The third argument of *register_chrdev*(), which is *&toyota_fops*, tells the kernel, *toyota_fops*, which is a *struct file_operations* variable, will be responsible for file operations on /dev/toyota (including /dev/toyota0, /dev/toyota1, /dev/toyota2, ...).. *toyota_fops* is defined as following:
+The third argument of *register_chrdev*(), which is *&toyota_fops*, tells the kernel, *toyota_fops*, which is a *struct file_operations* variable, will be responsible for file operations on /dev/toyota (including /dev/toyota0, /dev/toyota1, /dev/toyota2, ...). *toyota_fops* is defined as following:
 
 ```c
 /*  The different file operations.
