@@ -57,7 +57,7 @@ static int toyota_release (struct inode *inode, struct file *filp){
     return 0;
 }
 
-/* write the string to toyota_device->data for minor number 0;
+/* write the string to internal buffer for minor number 0;
  * pretends to ignore writes (like /dev/null) for minor numbers 1,2;
  * kill the calling process for minor number 3;
  * we assume applications will access our device sequentially, i.e., they do not access multiple devices concurrently.
@@ -68,7 +68,7 @@ static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, l
 }
 
 /* when read, we do not care the device minor number,
- * we process whatever is in toyota_device->data, and return the processed string (maybe multiple times) to user.
+ * we process whatever is in the internal buffer, and return the processed string (maybe multiple times, as a stream) to user.
  * we assume applications will access our device sequentially, i.e., they do not access multiple devices concurrently.
  * if successful, return count - user wants to read "count" bytes from this device.
  */
