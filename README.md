@@ -331,7 +331,7 @@ After all these tests, you should run *sudo ./toyota_unload*, which will remove 
 
 ## Submission
 
-Due: 23:59pm, April 21st, 2022. Late submission will not be accepted/graded.
+Due: 23:59pm, November 10th, 2022. Late submission will not be accepted/graded.
 
 ## Project Layout
 
@@ -353,7 +353,7 @@ All files necessary for compilation and testing need to be submitted, this inclu
   - You won't get these points if your module doesn't implement any of the above functional requirements.
 
 - [10 pts] Documentation:
-  - README.md file: replace this current README.md with a new one using the template. Do not check in this current README.
+  - README.md file (rename this current README file to README.orig and rename the README.template to README.md.)
   - You are required to fill in every section of the README template, missing 1 section will result in a 2-point deduction.
 
 ## Related Exercises
