@@ -57,7 +57,7 @@ static int toyota_release (struct inode *inode, struct file *filp){
     return 0;
 }
 
-/* write the string to internal buffer for minor number 0;
+/* write the string to the internal buffer for minor number 0;
  * pretends to ignore writes (like /dev/null) for minor numbers 1,2;
  * kill the calling process for minor number 3;
  * we assume applications will access our device sequentially, i.e., they do not access multiple devices concurrently.
