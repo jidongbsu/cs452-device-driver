@@ -1,5 +1,7 @@
 KERNEL_SOURCE=/lib/modules/`uname -r`/build
-CC = gcc
+MY_CFLAGS += -g -DDEBUG -O0
+ccflags-y += ${MY_CFLAGS}
+CC += ${MY_CFLAGS}
 
 all: toyota toyota-test1 toyota-test2 toyota-test3 toyota-test4
 
